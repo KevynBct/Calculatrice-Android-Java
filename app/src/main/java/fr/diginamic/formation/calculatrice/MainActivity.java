@@ -7,14 +7,19 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DecimalFormat;
+
 public class MainActivity extends AppCompatActivity {
 
     private TextView textResult;
+    private DecimalFormat format;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        format = new DecimalFormat("0.#########");
 
         textResult = findViewById(R.id.text_result);
 
@@ -78,20 +83,20 @@ public class MainActivity extends AppCompatActivity {
         String[] splitText;
         if(text.contains("+") && !endWithOperator(text)){
             splitText = text.split("\\+");
-            textResult.setText(String.valueOf(Double.parseDouble(splitText[0]) + Double.parseDouble(splitText[1])));
+            textResult.setText(String.valueOf(format.format(Double.parseDouble(splitText[0]) + Double.parseDouble(splitText[1]))));
         }
         if(text.contains("-") && !endWithOperator(text)){
             splitText = text.split("-");
-            textResult.setText(String.valueOf(Double.parseDouble(splitText[0]) - Double.parseDouble(splitText[1])));
+            textResult.setText(String.valueOf(format.format(Double.parseDouble(splitText[0]) - Double.parseDouble(splitText[1]))));
         }
-        if(text.contains("*") && !endWithOperator(text)){
+        if(text.contains("x") && !endWithOperator(text)){
             splitText = text.split("x");
-            textResult.setText(String.valueOf(Double.parseDouble(splitText[0]) * Double.parseDouble(splitText[1])));
+            textResult.setText(String.valueOf(format.format(Double.parseDouble(splitText[0]) * Double.parseDouble(splitText[1]))));
         }
         if(text.contains("/") && !endWithOperator(text)){
             splitText = text.split("/");
             if(Double.parseDouble(splitText[1]) != 0)
-                textResult.setText(String.valueOf(Double.parseDouble(splitText[0]) / Double.parseDouble(splitText[1])));
+                textResult.setText(String.valueOf(format.format(Double.parseDouble(splitText[0]) / Double.parseDouble(splitText[1]))));
         }
     }
 }
