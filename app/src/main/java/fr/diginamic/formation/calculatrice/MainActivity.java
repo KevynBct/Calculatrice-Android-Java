@@ -1,5 +1,6 @@
 package fr.diginamic.formation.calculatrice;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,6 +9,9 @@ import android.widget.TextView;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
+    private final String TEXT_RESULT = "textResult";
+    private final String TEXT_HISTO = "textHisto";
+
 
     private TextView textResult;
     private String textHisto;
@@ -20,6 +24,11 @@ public class MainActivity extends AppCompatActivity {
 
         textResult = findViewById(R.id.text_result);
         textHisto = "";
+
+        if(savedInstanceState != null){
+            textResult.setText(savedInstanceState.getString(this.TEXT_RESULT));
+            textHisto = savedInstanceState.getString(this.TEXT_HISTO);
+        }
 
         textResult.setOnClickListener(v -> {
             Intent intent = new Intent(this, InfoActivity.class);
@@ -64,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     public void addOperator(String operator){
         if(!endWithOperator(textResult.getText().toString()) && !textResult.getText().toString().isEmpty()){
             if(containsOperator(textResult.getText().toString()) && !operator.equals(".") && !textResult.getText().toString().startsWith("-")){
@@ -76,17 +86,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean containsOperator(String text){
-        if(text.contains("+") || text.contains("-") || text.contains("x") || text.contains("/"))
-            return  true;
-        else
-            return false;
+        return text.contains("+") || text.contains("-") || text.contains("x") || text.contains("/");
     }
 
-    public boolean endWithOperator(String text){
-        if(text.endsWith("+") || text.endsWith("-") || text.endsWith("x") || text.endsWith("/"))
-            return true;
-        else
-            return false;
+
+    public boolean endWithOperator(String text) {
+        return text.endsWith("+") || text.endsWith("-") || text.endsWith("x") || text.endsWith("/");
     }
 
     public int getOperatorIndex(String text){
@@ -136,5 +141,12 @@ public class MainActivity extends AppCompatActivity {
             textHisto += calcul + " = " + result + "\n";
         }
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(this.TEXT_RESULT, textResult.getText().toString());
+        outState.putString(this.TEXT_HISTO, textHisto);
+        super.onSaveInstanceState(outState);
     }
 }
