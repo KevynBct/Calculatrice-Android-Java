@@ -1,27 +1,31 @@
 package fr.diginamic.formation.calculatrice;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.text.DecimalFormat;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     private TextView textResult;
-    private DecimalFormat format;
+    private String textHisto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        format = new DecimalFormat("0.#########");
 
         textResult = findViewById(R.id.text_result);
+        textHisto = "";
+
+        textResult.setOnClickListener(v -> {
+            Intent intent = new Intent(this, InfoActivity.class);
+            intent.putExtra(InfoActivity.EXTRA_HISTO, textHisto);
+            startActivity(intent);
+        });
 
         findViewById(R.id.button_1).setOnClickListener( v -> textResult.setText(textResult.getText()+"1"));
         findViewById(R.id.button_2).setOnClickListener( v -> textResult.setText(textResult.getText()+"2"));
@@ -33,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button_8).setOnClickListener( v -> textResult.setText(textResult.getText()+"8"));
         findViewById(R.id.button_9).setOnClickListener( v -> textResult.setText(textResult.getText()+"9"));
         findViewById(R.id.button_0).setOnClickListener( v -> textResult.setText(textResult.getText()+"0"));
-        findViewById(R.id.button_dot).setOnClickListener( v -> addDot());
+        findViewById(R.id.button_dot).setOnClickListener( v -> addDot(textResult.getText().toString()));
         findViewById(R.id.button_delete).setOnClickListener( v -> textResult.setText(""));
 
         findViewById(R.id.button_plus).setOnClickListener( v -> addOperator("+"));
@@ -50,13 +54,19 @@ public class MainActivity extends AppCompatActivity {
         if(textResult.getText().equals("0")) textResult.setText("");
     }
 
-    public void addDot(){
-        if(!textResult.getText().toString().endsWith(".")) addOperator(".");
+    public void addDot(String text){
+        if(!containsOperator(text) && !text.contains(".")) {
+            addOperator(".");
+        }else if (text.startsWith("-") && !text.contains(".")){
+            addOperator(".");
+        }else if (getOperatorIndex(text) > text.lastIndexOf(".")){
+            addOperator(".");
+        }
     }
 
     public void addOperator(String operator){
-        if(!textResult.getText().toString().endsWith(operator) && !textResult.getText().toString().isEmpty()){
-            if(containsOperator(textResult.getText().toString())){
+        if(!endWithOperator(textResult.getText().toString()) && !textResult.getText().toString().isEmpty()){
+            if(containsOperator(textResult.getText().toString()) && !operator.equals(".") && !textResult.getText().toString().startsWith("-")){
                 calculate(textResult.getText().toString());
                 textResult.setText(textResult.getText() + operator);
             }else {
@@ -79,24 +89,52 @@ public class MainActivity extends AppCompatActivity {
             return false;
     }
 
+    public int getOperatorIndex(String text){
+        if(containsOperator(text)){
+            if(text.contains("+")) return text.lastIndexOf("+");
+            if(text.contains("-") && !text.startsWith("-")) return text.lastIndexOf("-");
+            if(text.contains("x")) return text.lastIndexOf("x");
+            if(text.contains("/")) return text.lastIndexOf("/");
+        }
+        return -1;
+    }
+
     public void calculate(String text){
         String[] splitText;
-        if(text.contains("+") && !endWithOperator(text)){
-            splitText = text.split("\\+");
-            textResult.setText(String.valueOf(format.format(Double.parseDouble(splitText[0]) + Double.parseDouble(splitText[1]))));
+        String calcul = "";
+        String result = "";
+        if(!endWithOperator(text) && containsOperator(text)){
+            if(text.contains("+")){
+                splitText = text.split("\\+");
+                calcul = Double.parseDouble(splitText[0]) + " + " + Double.parseDouble(splitText[1]);
+                result = String.format(Locale.US, "%.2f", Double.parseDouble(splitText[0]) + Double.parseDouble(splitText[1]));
+                textResult.setText(result);
+            }else if(text.contains("-")){
+                splitText = text.split("-");
+                if(text.startsWith("-")){
+                    calcul = Double.parseDouble(splitText[1]) + " - " + Double.parseDouble(splitText[2]);
+                    result = String.format(Locale.US, "%.2f", Double.parseDouble("-" + splitText[1]) - Double.parseDouble(splitText[2]));
+                    textResult.setText(result);
+                }else{
+                    calcul = Double.parseDouble(splitText[0]) + " - " + Double.parseDouble(splitText[1]);
+                    result = String.format(Locale.US, "%.2f", Double.parseDouble(splitText[0]) - Double.parseDouble(splitText[1]));
+                    textResult.setText(result);
+                }
+            }else if(text.contains("x")){
+                splitText = text.split("x");
+                calcul = Double.parseDouble(splitText[0]) + " * " + Double.parseDouble(splitText[1]);
+                result = String.format(Locale.US, "%.2f", Double.parseDouble(splitText[0]) * Double.parseDouble(splitText[1]));
+                textResult.setText(result);
+            }else if(text.contains("/")){
+                splitText = text.split("/");
+                if(Double.parseDouble(splitText[1]) != 0){
+                    calcul = Double.parseDouble(splitText[0]) + " / " + Double.parseDouble(splitText[1]);
+                    result = String.format(Locale.US, "%.2f", Double.parseDouble(splitText[0]) / Double.parseDouble(splitText[1]));
+                    textResult.setText(result);
+                }
+            }
+            textHisto += calcul + " = " + result + "\n";
         }
-        if(text.contains("-") && !endWithOperator(text)){
-            splitText = text.split("-");
-            textResult.setText(String.valueOf(format.format(Double.parseDouble(splitText[0]) - Double.parseDouble(splitText[1]))));
-        }
-        if(text.contains("x") && !endWithOperator(text)){
-            splitText = text.split("x");
-            textResult.setText(String.valueOf(format.format(Double.parseDouble(splitText[0]) * Double.parseDouble(splitText[1]))));
-        }
-        if(text.contains("/") && !endWithOperator(text)){
-            splitText = text.split("/");
-            if(Double.parseDouble(splitText[1]) != 0)
-                textResult.setText(String.valueOf(format.format(Double.parseDouble(splitText[0]) / Double.parseDouble(splitText[1]))));
-        }
+
     }
 }
