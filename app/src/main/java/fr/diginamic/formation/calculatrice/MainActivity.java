@@ -8,6 +8,11 @@ import android.widget.TextView;
 
 import java.util.Locale;
 
+import io.sentry.Sentry;
+import io.sentry.android.AndroidSentryClientFactory;
+import io.sentry.event.BreadcrumbBuilder;
+import io.sentry.event.UserBuilder;
+
 public class MainActivity extends AppCompatActivity {
     private final String TEXT_RESULT = "textResult";
     private final String TEXT_HISTO = "textHisto";
@@ -21,6 +26,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        android.content.Context ctx = this.getApplicationContext();
+
+        String sentryDsn = "https://0137cf0c2146461698408be6fb7d8ff0@sentry.io/1365606";
+        Sentry.init(sentryDsn, new AndroidSentryClientFactory(ctx));
+
+        Sentry.getContext().recordBreadcrumb(
+                new BreadcrumbBuilder().setMessage("User start Calculatrice").build()
+        );
+
+        Sentry.capture("Calculate");
 
         textResult = findViewById(R.id.text_result);
         textHisto = "";
@@ -141,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
             textHisto += calcul + " = " + result + "\n";
         }
 
+        throw new NullPointerException();
     }
 
     @Override
