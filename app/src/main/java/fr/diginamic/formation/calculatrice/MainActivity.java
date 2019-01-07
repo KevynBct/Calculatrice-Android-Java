@@ -2,16 +2,11 @@ package fr.diginamic.formation.calculatrice;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import java.util.Locale;
-
-import io.sentry.Sentry;
-import io.sentry.android.AndroidSentryClientFactory;
-import io.sentry.event.BreadcrumbBuilder;
-import io.sentry.event.UserBuilder;
 
 public class MainActivity extends AppCompatActivity {
     private final String TEXT_RESULT = "textResult";
@@ -25,17 +20,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        android.content.Context ctx = this.getApplicationContext();
-
-        String sentryDsn = "https://0137cf0c2146461698408be6fb7d8ff0@sentry.io/1365606";
-        Sentry.init(sentryDsn, new AndroidSentryClientFactory(ctx));
-
-        Sentry.getContext().recordBreadcrumb(
-                new BreadcrumbBuilder().setMessage("User start Calculatrice").build()
-        );
-
-        Sentry.capture("Calculate");
 
         textResult = findViewById(R.id.text_result);
         textHisto = "";
@@ -123,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         String[] splitText;
         String calcul = "";
         String result = "";
+
         if(!endWithOperator(text) && containsOperator(text)){
             if(text.contains("+")){
                 splitText = text.split("\\+");
@@ -155,8 +140,6 @@ public class MainActivity extends AppCompatActivity {
             }
             textHisto += calcul + " = " + result + "\n";
         }
-
-        throw new NullPointerException();
     }
 
     @Override
